@@ -6,5 +6,5 @@ Jan Kolomazník <jan.kolomazník@gmail.com>
 [plantuml, diagram/usecase_diagram, svg]
 ----
 left to right direction
-
+include::../S01_create_story.adoc[tag=diagram_usecase]
 ----

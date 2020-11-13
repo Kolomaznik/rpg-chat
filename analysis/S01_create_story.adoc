@@ -1,0 +1,134 @@
+= Scénář {id}: Create Story
+Jan Kolomazník <jan.kolomazník@gmail.com>
+:id: S01
+:toc: left
+:icons: font
+
+== Usecase Create Story
+[plantuml, diagram/{id}_usecase, svg]
+----
+left to right direction
+' tag::diagram_usecase[]
+:User: --> (Create Story)
+(Create Story) --> :GAME_MASTER: :Stane se
+' end::diagram_usecase[]
+----
+
+Uživel přihlášený do systému může založity novou _příběhovou hru_ (`Story`).
+Automaticky se stane _Hráčem_ (`Player`) v této hře s rolí `GAME_MASTER`.
+A automaticky se vytvoří hlavní příběhovou linii: `Line` do které mohou hráči formou příspvěků: `Post`.
+Tyto příspěcky mohou psát za svojí poztavu `Character` nebo sami za sebe.
+
+Každá _Příběhová hra_ má název (`title`).
+
+== Design UI
+
+image::design/{id}_create_story.svg[]
+
+Uživateli se zobrazí jednoduchý seznam her, ve kterých hraje nějakou roli.
+
+Rovněž je mu umožněno po vyplnění názvu Příběhu
+
+.Model
+* `name`: jméno uživatle
+
+* `stories`: seznam jeho dobrodruští setízeni podle poslední aktivity
+** `image`: Motivační obrázek definovaný u příbehu
+**  `title`: Název příbehu
+** `last_activity`: Posladní aktivita zaz
+*** `Author`: Kdo je autorem aktivity
+*** `timestamp`: datum a čas kdy byla událost vytvořena
+*** `message`: Zpráva učivatele v chat.
++
+_Zatím se počítá pouze se zprávami do budoucna může přibýt další typy._
+
+* `new_story`: Data ve formulári pro nový scénář
+** `title`: titulek příběhu
+** `image`: může být nahrán uživatelm
+*** `predefine_images`: Uživatel má možnost si výbrat jeden z předefinovaných žánrových obrázků.
+
+== Digram datových tříd
+[plantuml, diagram/{id}_class, svg]
+----
+' tag::diagram_class[]
+
+namespace cz.rpg.chat.user {
+    class .User {
+    + nickname: String
+    }
+}
+
+namespace cz.rpg.chat.story {
+    class .Player {
+    + user: User
+    + story: Story
+    + role: Role
+    }
+
+    class .Story {
+    + Story(User gamemaser, String title)
+    + title: String
+    + image: Image
+    + player: Collection
+    + storyLine: line
+    }
+
+    class .Line {
+    + posts: Collection
+    }
+
+    class .Post {
+    + player: Player
+    + timestamp: DateTime
+    + message: String
+    }
+
+    enum .Role {
+        GAME_MASTER
+        PLAYER
+        OBSERVER
+    }
+}
+
+Player *-- "1" User : user
+Player *-- "1" Story : story
+Player *-- "1" Role : role
+Story *-- "1" Line : storyLine
+Line *- "n" Post : posts
+Post *- "1" Player : posts
+' end::diagram_class[]
+----
+
+Třída `Player` spojuje uživatele s příběhem a rošiřuje jej o schopnost se podílet na příběhu v různých rolích.
+
+== Modelování prcesu
+[plantuml, diagram/{id}_sequence, svg]
+----
+skinparam responseMessageBelowArrow true
+' tag::diagram_sequence[]
+actor User
+participant StoryService
+participant UserService
+database StoryRepository
+
+User -> StoryService : createStory
+activate StoryService
+
+StoryService -> UserService : findUser
+activate UserService
+return user
+
+StoryService -> StoryRepository : save
+
+return story
+' tag::diagram_sequence[]
+----
+
+.Methods
+- *createStory*: service StoryService získá požadavek na vytvoření příběhu.
+K tomu potřebuje UUID Uživatel a název příběhu.
+
+- *findUser*: Z User Service získá uživatele, pro vytvoření Player.
+- Vytvoří Story, Player a Story line.
+- *save*: Story service vše uloží do databáze pomocí StoryRepository.
+- Vytvořená story se vrací uživateli.
