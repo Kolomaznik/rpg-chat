@@ -1,0 +1,10 @@
+= UseCases diagrams
+Jan Kolomazník <jan.kolomazník@gmail.com>
+:toc: left
+:icons: font
+
+[plantuml, diagram/usecase_diagram, svg]
+----
+left to right direction
+
+----

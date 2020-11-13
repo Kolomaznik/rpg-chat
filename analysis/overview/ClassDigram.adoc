@@ -1,0 +1,10 @@
+= ClassDiagram diagrams
+Jan Kolomazník <jan.kolomazník@gmail.com>
+:toc: left
+:icons: font
+
+[plantuml, diagram/class_diagram, svg]
+----
+left to right direction
+
+----
